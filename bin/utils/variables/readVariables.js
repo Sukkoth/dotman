@@ -1,13 +1,13 @@
 import { join } from 'path';
 import { existsSync, readFileSync } from 'fs';
-import chalk from 'chalk';
+import { toast } from '../consoleDisplay.js';
 
-export default function readVariables() {
+export function readLocalVariables(project) {
     const currentDir = process.cwd();
     const envPath = join(currentDir, '.env');
 
     if (!existsSync(envPath)) {
-        console.error(chalk.red('Error: .env file not found in the current directory'));
+        toast({ message: 'Error: .env file not found in the current directory' });
         process.exit(1);
     }
 
@@ -19,8 +19,6 @@ export default function readVariables() {
     envContent.split('\n').forEach(line => {
         line = line.trim();
         if (line && !line.startsWith('#')) {
-            // BEWARE: This could give you many arrays if the values also have = sign in it
-            // That's why you need to use join() in the if statement for the value
             const [key, ...values] = line.split('=');
             if (key) {
                 envVars[key.trim()] = values.join('=').trim();
@@ -29,4 +27,8 @@ export default function readVariables() {
     });
 
     return envVars;
+}
+
+export async function readCloudVariables() {
+    return {};
 }

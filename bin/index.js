@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 import { Command, Option } from 'commander';
-import displayVariables from "./utils/displayVariables.js";
-import { loginCommand } from "./utils/loginCommand.js";
-import readVariables from "./utils/readVariables.js";
 import { getPropjects } from './services/projectsService.js';
 import { toast, displayProjects } from './utils/consoleDisplay.js';
-import { generateExampleEnvFile } from './utils/generateExample.js';
+import { loginCommand, logoutCommand } from './commands/authCommands.js';
+import { generateExampleEnvFileCommand, listVariablesCommand } from './commands/variableCommands.js';
+import { linkProjectCommand } from './commands/projectCommands.js';
 
 const program = new Command();
 
@@ -14,21 +13,32 @@ program
     .description('Manage your .env variables efficiently')
     .version('1.0.0');
 
-
 program.command('login')
     .description('Login to your account')
     .requiredOption('--email <email>', 'Your email address')
-    .action(({email}) => {
+    .action(({ email }) => {
         loginCommand(email);
     });
 
+program.command('logout')
+    .description('Logout of your account')
+    .action(() => {
+        logoutCommand();
+    });
+
+program.command('link')
+    .description('Link a project to sync variables')
+    .action(() => {
+        linkProjectCommand();
+    });
 // List command
 program
     .command('list')
     .description('List all environment variables in the project')
-    .action(() => {
-        const envVars = readVariables();
-        displayVariables(envVars);
+    .option('--local', 'List local variables, this is default')
+    .option('--cloud', 'List variables from the cloud')
+    .action((option) => {
+        listVariablesCommand(option);
     });
 
 // Get command
@@ -65,7 +75,7 @@ program
         .choices(['dev', 'prod', 'staging'])
         .default('dev', 'Use .env.local as default to generate example'))
     .action((option) => {
-        generateExampleEnvFile(option.use);
+        generateExampleEnvFileCommand(option);
     });
 
 
